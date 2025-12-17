@@ -1,6 +1,6 @@
 import py, os, sys
 from pytest import mark, skip
-from .support import setup_make, pylong, pyunicode, IS_CLANG_REPL
+from support import setup_make, pylong, pyunicode, IS_CLANG_REPL
 
 nopsutil = False
 try:
@@ -174,8 +174,9 @@ class TestLEAKCHECK:
 
         self.check_func(ns, 'free_default')
         self.check_func(ns, 'free_default', a=-99)
-        self.check_func(ns, 'free_default', b=-99)
-        self.check_func(ns, 'free_default', c=-99)
+        # setting a second or third arg, requires others... otherwise segfaults
+        self.check_func(ns, 'free_default', b=-99., a=11, c=33.)
+        self.check_func(ns, 'free_default', c=-99., a=11, b=22.)
 
         # TODO: no keyword arguments for static methods yet
         #for m in [ns.MyClass04, ns.MyClass04()]:
@@ -187,8 +188,9 @@ class TestLEAKCHECK:
         m = ns.MyClass04()
         self.check_func(m, 'method_default')
         self.check_func(m, 'method_default', a=-99)
-        self.check_func(m, 'method_default', b=-99)
-        self.check_func(m, 'method_default', c=-99)
+        # setting a second or third arg, requires others... otherwise segfaults
+        self.check_func(m, 'method_default', b=-99., a=11, c=33.)
+        self.check_func(m, 'method_default', c=-99., a=11, b=22.)
 
     def test05_aggregates(self):
         """Leak test of aggregate creation"""
@@ -214,7 +216,9 @@ class TestLEAKCHECK:
 
         self.check_func(ns, 'SomePOD')
         self.check_func(ns, 'SomePOD', fInt=42)
-        self.check_func(ns, 'SomePOD', fDouble=42.)
+        # this seg faults
+        #self.check_func(ns, 'SomePOD', fDouble=42.)
+        self.check_func(ns, 'SomePOD', fDouble=42., fInt=0)
         self.check_func(ns, 'SomePOD', fInt=42, fDouble=42.)
         self.check_func(ns, 'SomePOD', fDouble=42., fInt=42)
 

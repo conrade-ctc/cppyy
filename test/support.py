@@ -3,8 +3,12 @@ import os, py, sys, subprocess
 
 currpath = py.path.local(__file__).dirpath()
 
+SKIP_MAKE = os.getenv("CPPYY_TEST_SKIP_MAKE", False)
 
 def setup_make(targetname):
+    if SKIP_MAKE:
+        return
+
     if sys.platform == 'win32':
         popen = subprocess.Popen([sys.executable, "make_dict_win32.py", targetname], cwd=str(currpath),
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -13,7 +17,7 @@ def setup_make(targetname):
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = popen.communicate()
     if popen.returncode:
-        raise OSError("'make' failed:\n%s" % (stdout,))
+        raise OSError("'make' failed:\n%s\n%s" % (stdout,currpath))
 
 if sys.hexversion >= 0x3000000:
     pylong = int

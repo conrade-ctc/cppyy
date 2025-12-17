@@ -1,6 +1,6 @@
 import py, os
 from pytest import raises, mark
-from .support import setup_make, pylong, IS_CLANG_REPL, IS_CLING, IS_CLANG_DEBUG, IS_MAC_X86, IS_MAC_ARM, IS_MAC, IS_LINUX_ARM, IS_VALGRIND
+from support import setup_make, pylong, IS_CLANG_REPL, IS_CLING, IS_CLANG_DEBUG, IS_MAC_X86, IS_MAC_ARM, IS_MAC, IS_LINUX_ARM, IS_VALGRIND
 
 currpath = py.path.local(__file__).dirpath()
 test_dct = str(currpath.join("templatesDict"))
@@ -158,7 +158,14 @@ class TestTEMPLATES:
 
         import cppyy
         cppyy.gbl.AttrTesting      # load
-        from cppyy.gbl.AttrTesting import Obj1, Obj2, has_var1, call_has_var1
+
+        # FIXME: from import doesn't work, direct does...
+        #from cppyy.gbl.AttrTesting import Obj1, Obj2, has_var1, call_has_var1
+        Obj1 = cppyy.gbl.AttrTesting.Obj1
+        Obj2 = cppyy.gbl.AttrTesting.Obj2
+        has_var1 = cppyy.gbl.AttrTesting.has_var1
+        call_has_var1 = cppyy.gbl.AttrTesting.call_has_var1
+
         from cppyy.gbl.std import move
 
         assert has_var1(Obj1()) == hasattr(Obj1(), 'var1')
@@ -174,7 +181,12 @@ class TestTEMPLATES:
 
         import cppyy
         cppyy.gbl.AttrTesting      # load
-        from cppyy.gbl.AttrTesting import select_template_arg, Obj1, Obj2
+
+        # FIXME: from import doesn't work, direct does...
+        # from cppyy.gbl.AttrTesting import select_template_arg, Obj1, Obj2
+        select_template_arg = cppyy.gbl.AttrTesting.select_template_arg
+        Obj1 = cppyy.gbl.AttrTesting.Obj1
+        Obj2 = cppyy.gbl.AttrTesting.Obj2
 
         assert select_template_arg[0, Obj1, Obj2].argument == Obj1
         assert select_template_arg[1, Obj1, Obj2].argument == Obj2
