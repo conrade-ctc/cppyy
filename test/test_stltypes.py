@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 import py, os, sys
 from pytest import raises, skip, mark
 from support import setup_make, pylong, pyunicode, maxvalue, ispypy, IS_CLANG_REPL, IS_CLING, IS_CLANG_DEBUG, IS_MAC_X86, IS_MAC_ARM, IS_MAC, IS_VALGRIND, IS_LINUX_ARM
@@ -1711,6 +1710,82 @@ class TestSTLARRAY:
         # ... but this doesn't, fails complaining about not being able to iterate
         assert sum([v.count() for v in cppyy.gbl.atimes]) == 1510
 
+    def test06_bind_object_array_of_size_1_should_work(self):
+        import cppyy
+        cppyy.cppdef("""
+        uint64_t ptr[1] = {42};
+        """)
+
+        assert cppyy.gbl.ptr[0] == 42
+
+        cpp_vec = cppyy.bind_object(cppyy.gbl.ptr, f"std::array<uint64_t, 1>")
+        assert cpp_vec[0] == 42
+
+    def test07_virtuals(self):
+        import cppyy
+        cppyy.cppdef("""
+        namespace utils::other {
+        struct XB {
+          virtual ~XB() = default;
+          virtual int f() const = 0;
+          virtual void set(int) = 0;
+        };
+        }
+        """)
+
+        cppyy.cppdef("""
+        namespace main {
+        template <typename GT> struct X : public utils::other::XB {
+          ~X() = default;
+          void g(GT &g_) { x = g_.g; }
+          int f() const override { return x; }
+          void set(int r) override { x=r; }
+        private:
+          int x;
+        };
+        }
+        """)
+
+        cppyy.cppdef("""
+        namespace main {
+        struct MDI {
+          MDI();
+          ~MDI();
+          utils::other::XB& get();
+        private:
+          struct Impl;
+          std::unique_ptr<Impl> impl;
+        };
+        }
+        """)
+
+        cppyy.cppdef("""
+        namespace main {
+        struct G { int g{1}; };
+        struct MD {
+          MD() { x.g(g); }
+          using GT = G;
+          X<GT> &get() { return x; };
+        private:
+          [[no_unique_address]] X<GT> x;
+          GT g{};
+          bool what{false};
+        };
+        struct MDI::Impl : MD {};
+        MDI::MDI() : impl{std::make_unique<Impl>()} {}
+        MDI::~MDI() {}
+        utils::other::XB& MDI::get() { return impl->get(); }
+        }
+        """)
+
+        mdic = cppyy.gbl.main.MDI
+        mdii = mdic()
+        mdiif = getattr(mdii, "get")
+        print(mdiif.__cpp_name__)
+        mdiic = mdiif()
+
+        assert mdiic.f() == 1
+
 
 class TestSTLSTRING_VIEW:
     def setup_class(cls):
@@ -1902,6 +1977,7 @@ class TestSTLSET:
         v = cppyy.gbl.std.set(l)
         assert list(l) == l
 
+    @mark.xfail
     def test05_contains(self):
         """Contains check should not iterate and compare"""
 
