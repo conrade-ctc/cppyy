@@ -261,7 +261,7 @@ def load_library(name):
     with _stderr_capture() as err:
         result = gbl.Cpp.LoadLibrary(name, True)
     if result == False:
-        raise RuntimeError('Could not load library "%s": %s' % (name, err.err))
+        raise RuntimeError('Could not load library "%s": %s, cwd=%s' % (name, err.err, os.getcwd()))
 
     return True
 
@@ -270,7 +270,7 @@ def include(header):
     with _stderr_capture() as err:
         errcode = gbl.Cpp.Declare('#include "%s"' % header, False)
     if not errcode == 0:
-        raise ImportError('Failed to load header file "%s"%s' % (header, err.err))
+        raise ImportError('Failed to load header file "%s" [errcode=%d, err.err=%s]' % (header, errcode, err.err))
     return True
 
 def c_include(header):
