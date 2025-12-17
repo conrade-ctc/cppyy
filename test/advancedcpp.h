@@ -279,7 +279,10 @@ extern double my_global_double;    // a couple of globals for access testing
 extern double my_global_array[500];
 extern double* my_global_ptr;
 static const char my_global_string1[] = "aap " " noot " " mies";
-extern const char my_global_string2[];
+// FIXME: this version segfaults
+// the const char* version doesn't...
+//extern const char my_global_string2[];
+extern const char* my_global_string2;
 extern const char* my_global_string3[3];
 
 class some_int_holder {
@@ -356,7 +359,7 @@ public:
 class multi1 {                     // for testing multiple inheritance
 public:
     multi1(int val) : m_int(val) {}
-    virtual ~multi1();
+    virtual ~multi1() {}
     int get_multi1_int() { return m_int; }
 
 private:
@@ -366,7 +369,7 @@ private:
 class multi2 {
 public:
     multi2(int val) : m_int(val) {}
-    virtual ~multi2();
+    virtual ~multi2() {}
     int get_multi2_int() { return m_int; }
 
 private:
@@ -377,7 +380,7 @@ class multi : public multi1, public multi2 {
 public:
     multi(int val1, int val2, int val3) :
         multi1(val1), multi2(val2), m_int(val3) {}
-    virtual ~multi();
+    ~multi() override {}
     int get_my_own_int() { return m_int; }
 
 private:

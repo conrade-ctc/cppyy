@@ -111,6 +111,7 @@ CppyyTestData::~CppyyTestData()
 void CppyyTestData::destroy_arrays() {
     if (m_owns_arrays == true) {
         delete[] m_bool_array2;
+        delete[] m_schar_array2;
         delete[] m_uchar_array2;
 #if __cplusplus > 201402L
         delete[] m_byte_array2;
@@ -218,10 +219,10 @@ const wchar_t&              CppyyTestData::get_wchar_cr()    { return m_wchar; }
 const char16_t&             CppyyTestData::get_char16_cr()   { return m_char16; }
 const char32_t&             CppyyTestData::get_char32_cr()   { return m_char32; }
 #if __cplusplus > 201402L
-const std::byte&            CppyyTestData::get_byte_cr()     { return m_byte; }
+/*const*/std::byte&            CppyyTestData::get_byte_cr()     { return m_byte; }
 #endif
-const int8_t&               CppyyTestData::get_int8_cr()     { return m_int8; }
-const uint8_t&              CppyyTestData::get_uint8_cr()    { return m_uint8; }
+/*const*/int8_t&               CppyyTestData::get_int8_cr()     { return m_int8; }
+/*const*/uint8_t&              CppyyTestData::get_uint8_cr()    { return m_uint8; }
 const short&                CppyyTestData::get_short_cr()    { return m_short; }
 const unsigned short&       CppyyTestData::get_ushort_cr()   { return m_ushort; }
 const int&                  CppyyTestData::get_int_cr()      { return m_int; }

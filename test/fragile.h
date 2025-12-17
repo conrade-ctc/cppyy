@@ -99,14 +99,14 @@ namespace nested1 {
 
 class K {
 public:
-    virtual ~K();
+    virtual ~K() {}
     K* GimeK(bool derived);
     K* GimeL();
 };
 
 class L : public K {
 public:
-    virtual ~L();
+    virtual ~L() {}
     no_such_class* m_no_such;
 };
 

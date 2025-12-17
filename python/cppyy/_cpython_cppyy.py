@@ -189,15 +189,44 @@ bind_object   = _backend.bind_object
 nullptr       = _backend.nullptr
 default       = _backend.default
 
+DIRECT_LOAD = True
+DIRECT_LOADED = {}
+
 def load_reflection_info(name):
 #    with _stderr_capture() as err:
     CppInterOp = gbl.Cpp
-    #FIXME: Remove the .so and add logic in libcppinterop
-    name = name + ".so"
-    result = CppInterOp.LoadLibrary(name)
-    if name.endswith("Dict.so"):
-        header = name[:-7] + ".h";
-        CppInterOp.Declare('#include "' + header +'"')
+
+    if DIRECT_LOAD:
+        if name in DIRECT_LOADED:
+            result = True
+
+        # test hack
+        elif name.endswith("Dict"):
+            if name.find("/") < 0:
+                name = "/" + "/".join(__file__.split("/")[0:-3]) + "/test/" + name
+
+            # manually ensure path is included...
+            path = "/" + "/".join(name.split("/")[0:-1])
+            CppInterOp.AddIncludePath(path)
+
+            # then load cxx
+            cxx = name[:-4] + ".cxx";
+            cxxdata = open(cxx, "r").read()
+            result = (CppInterOp.Declare(cxxdata) == 0)
+
+            DIRECT_LOADED[name] = result
+
+        else:
+            raise RuntimeError(name + " is not a valid direct load test module")
+
+    else:
+        #FIXME: Remove the .so and add logic in libcppinterop
+        name = name + ".so"
+        result = CppInterOp.LoadLibrary(name)
+
+        if name.endswith("Dict.so"):
+            header = name[:-7] + ".h";
+            CppInterOp.Declare('#include "' + header +'"')
 
     if result == False:
         raise RuntimeError('Could not load library "%s"' % (name))

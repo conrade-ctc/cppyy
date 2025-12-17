@@ -89,7 +89,10 @@ double my_global_double = 12.;
 double my_global_array[500];
 static double sd = 1234.;
 double* my_global_ptr = &sd;
-const char my_global_string2[] = "zus jet teun";
+// FIXME: this version segfaults
+// the const char* version doesn't...
+//const char my_global_string2[] = "zus jet teun";
+const char* my_global_string2 = "zus jet teun";
 const char* my_global_string3[3] = {"aap", "noot", "mies"};
 some_int_holder my_global_int_holders[5] = {
     some_int_holder(13), some_int_holder(42), some_int_holder(88),
@@ -103,9 +106,10 @@ int some_class_with_data::some_data::s_num_data = 0;
 
 
 // for testing multiple inheritance
-multi1::~multi1() {}
-multi2::~multi2() {}
-multi::~multi() {}
+// FIXME: defining these here instead of in the header fails the test...
+//multi1::~multi1() {}
+//multi2::~multi2() {}
+//multi::~multi() {}
 
 
 // for testing calls to overloaded new

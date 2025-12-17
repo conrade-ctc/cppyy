@@ -23,7 +23,8 @@ namespace fragile {
 
 fragile::Kderived::~Kderived() {}
 
-fragile::K::~K() {}
+// FIXME: move impl to header to fix test
+//fragile::K::~K() {}
 
 fragile::K* fragile::K::GimeK(bool derived) {
     if (!derived) return this;
@@ -38,7 +39,8 @@ fragile::K* fragile::K::GimeL() {
     return &l;
 }
 
-fragile::L::~L() {}
+// FIXME: move impl to header to fix test
+//fragile::L::~L() {}
 
 
 int fragile::create_handle(OpaqueHandle_t* handle) {

@@ -11,7 +11,7 @@ class Base1 {                // for overridden method checking
 public:
     Base1() : m_int(42) {}
     Base1(int i) : m_int(i) {}
-    virtual ~Base1();
+    virtual ~Base1() {}
 
     virtual int get_value() { return m_int; }
     static int call_get_value(Base1* b);
@@ -51,7 +51,7 @@ public:
 
 class CBase2 : public IBase2 {
 public:
-    int get_value();
+    int get_value() { return 42; }
 };
 
 class IBase4 {
@@ -64,7 +64,7 @@ public:
 
 class CBase4 : public IBase4 {
 public:
-    int get_value() const;
+    int get_value() const { return 27; }
 };
 
 template<typename T>
@@ -78,7 +78,7 @@ public:
 
 class TDerived1 : public TBase1<int> {
 public:
-    int get_value();
+    int get_value() { return 27; }
 };
 
 using TBase1_I = TBase1<int>;
@@ -88,9 +88,9 @@ public:
     CountableBase();
     CountableBase(const CountableBase&);
     CountableBase& operator=(const CountableBase&);
-    virtual ~CountableBase();
+    virtual ~CountableBase() { --s_count; }
 
-    virtual int call();
+    virtual int call() { return -1 ; }
 
     static int s_count;
 };
@@ -100,7 +100,7 @@ public:
     Component();
     Component(const Component&) = delete;
     Component& operator=(const Component&) = delete;
-    virtual ~Component();
+    virtual ~Component() { --s_count; }
 
     static int get_count();
 
@@ -120,10 +120,10 @@ namespace AccessProtected {  // for protected member testing
 class MyBase {
 public:
     MyBase();
-    virtual ~MyBase();
+    virtual ~MyBase() {}
 
 protected:
-    virtual int get_data_v();
+    virtual int get_data_v() { return my_data; }
     int get_data();
 
 protected:

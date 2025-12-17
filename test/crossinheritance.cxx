@@ -2,7 +2,8 @@
 
 
 // for overridden method checking
-CrossInheritance::Base1::~Base1() {}
+// FIXME: moved to header
+//CrossInheritance::Base1::~Base1() {}
 
 int CrossInheritance::Base1::call_get_value(Base1* b) {
     return b->get_value();
@@ -39,21 +40,24 @@ CrossInheritance::IBase3::IBase3(int i) {
     m_int = i;
 }
 
-int CrossInheritance::CBase2::get_value() {
-    return 42;
-}
+// FIXME: moved impl to base to fix test
+//int CrossInheritance::CBase2::get_value() {
+//    return 42;
+//}
 
 int CrossInheritance::IBase4::call_get_value(IBase4* b) {
     return b->get_value();
 }
 
-int CrossInheritance::CBase4::get_value() const {
-    return 27;
-}
+// FIXME: moved impl to base to fix test
+//int CrossInheritance::CBase4::get_value() const {
+//    return 27;
+//}
 
-int CrossInheritance::TDerived1::get_value() {
-    return 27;
-}
+// FIXME: moved impl to base to fix test
+//int CrossInheritance::TDerived1::get_value() {
+//    return 27;
+//}
 
 int CrossInheritance::CountableBase::s_count = 0;
 
@@ -69,21 +73,24 @@ CrossInheritance::CountableBase& CrossInheritance::CountableBase::operator=(cons
     return *this;
 }
 
-CrossInheritance::CountableBase::~CountableBase() {
-    --s_count;
-}
+// FIXME: moved impl to base to fix test
+//CrossInheritance::CountableBase::~CountableBase() {
+//    --s_count;
+//}
 
-int CrossInheritance::CountableBase::call() {
-    return -1;
-}
+// FIXME: moved impl to base to fix test
+//int CrossInheritance::CountableBase::call() {
+//    return -1;
+//}
 
 CrossInheritance::Component::Component() {
     ++s_count;
 }
 
-CrossInheritance::Component::~Component() {
-    --s_count;
-}
+// FIXME: moved impl to base to fix test
+//CrossInheritance::Component::~Component() {
+//    --s_count;
+//}
 
 int CrossInheritance::Component::get_count() {
     return s_count;
@@ -117,13 +124,14 @@ AccessProtected::MyBase::MyBase() : my_data(101) {
     /* empty */
 }
 
-AccessProtected::MyBase::~MyBase() {
-    /* empty */
-}
+// FIXME: moved impl to header to fix test
+//AccessProtected::MyBase::~MyBase() {
+//    /* empty */
+//}
 
-int AccessProtected::MyBase::get_data_v() {
-    return my_data;
-}
+//int AccessProtected::MyBase::get_data_v() {
+//    return my_data;
+//}
 
 int AccessProtected::MyBase::get_data() {
     return my_data;

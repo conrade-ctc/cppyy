@@ -183,10 +183,10 @@ public:
     const char16_t&           get_char16_cr();
     const char32_t&           get_char32_cr();
 #if __cplusplus > 201402L
-    const std::byte&          get_byte_cr();
+    /*const*/std::byte&          get_byte_cr();
 #endif
-    const int8_t&             get_int8_cr();
-    const uint8_t&            get_uint8_cr();
+    /*const*/int8_t&             get_int8_cr();
+    /*const*/uint8_t&            get_uint8_cr();
     const short&              get_short_cr();
     const unsigned short&     get_ushort_cr();
     const int&                get_int_cr();

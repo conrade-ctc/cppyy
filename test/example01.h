@@ -27,7 +27,7 @@ public:
     example01(int a);
     example01(const example01& e);
     example01& operator=(const example01& e);
-    virtual ~example01();
+    virtual ~example01() { count -= 1; }
 
 public:        // class-level methods
     static int staticAddOneToInt(int a);

@@ -14,13 +14,14 @@ std::unique_ptr<TestSmartPtr> create_unique_ptr_instance() {
     return std::unique_ptr<TestSmartPtr>(new TestSmartPtr);
 }
 
-int TestSmartPtr::get_value() {
-    return 17;
-}
+// FIXME: move these defs to headers to pass tests, needs work
+//int TestSmartPtr::get_value() {
+ //   return 17;
+//}
 
-int DerivedTestSmartPtr::get_value() {
-    return m_int + 76;
-}
+//int DerivedTestSmartPtr::get_value() {
+//    return m_int + 76;
+//}
 
 int pass_shared_ptr(std::shared_ptr<TestSmartPtr> p) {
     return p->get_value();

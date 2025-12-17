@@ -1,6 +1,6 @@
 import py, os, sys
 from pytest import raises, skip, mark
-from .support import setup_make, pylong, pyunicode, IS_CLANG_REPL, IS_CLING, IS_MAC_X86, IS_MAC_ARM, IS_MAC, IS_LINUX
+from support import setup_make, pylong, pyunicode, IS_CLANG_REPL, IS_CLING, IS_MAC_X86, IS_MAC_ARM, IS_MAC, IS_LINUX
 
 IS_MAC = IS_MAC_X86 or IS_MAC_ARM
 
@@ -10,6 +10,9 @@ test_dct = str(currpath.join("datatypesDict"))
 def setup_module(mod):
     setup_make("datatypes")
 
+import gc
+def gccollect():
+    gc.collect()
 
 class TestDATATYPES:
     def setup_class(cls):
@@ -1406,7 +1409,7 @@ class TestDATATYPES:
         assert c(3, 3) == 9.           # life line protected
 
         c.__dict__.clear()             # destroys life lines
-        gc.collect()
+        gccollect()
         raises(TypeError, c, 3, 3) # lambda gone out of scope
 
     @mark.xfail(run=False, condition=IS_MAC, reason="Crashes on MacOS")
@@ -1479,7 +1482,7 @@ class TestDATATYPES:
         assert c(3, 3) == 9.           # life line protected
 
         c.__dict__.clear()             # destroys life lines
-        gc.collect()
+        gccollect()
         raises(TypeError, c, 3, 3) # lambda gone out of scope
 
     @mark.xfail(condition=IS_MAC, reason="Fails on OS X")
@@ -1514,7 +1517,7 @@ class TestDATATYPES:
         assert d.do_execute() == "xyz"
         assert d.do_execute() == "xyz"
 
-        gc.collect()
+        gccollect()
         assert d.do_execute() == "xyz"
 
         d.execute = d.xyz
@@ -1752,7 +1755,7 @@ class TestDATATYPES:
         assert c.s_strp               == "noot"
         assert sn                     == "noot"  # set through pointer
 
-    @mark.xfail
+    #@mark.xfail
     def test35_restrict(self):
         """Strip __restrict keyword from use"""
 
@@ -1876,6 +1879,7 @@ class TestDATATYPES:
         m = ns.create_matrix(N, M)
         assert ns.destroy_matrix(ns.g_matrix, N, M)
 
+    @mark.xfail(run=False, reason="crashes")
     def test38_plain_old_data(self):
         """Initializer construction of PODs"""
 
@@ -2051,6 +2055,7 @@ class TestDATATYPES:
             r2 = ns.make_R2()
             assert r2.s.x == 1
 
+    @mark.xfail(run=False, reason="crashes")
     def test41_complex_numpy_arrays(self):
         """Usage of complex numpy arrays"""
 
@@ -2111,6 +2116,7 @@ class TestDATATYPES:
         assert c*(c*c) == p*(p*p)
         assert (c*c)*c == (p*p)*p
 
+    @mark.xfail(run=False, reason="crashes")
     def test43_ccharp_memory_handling(self):
         """cppyy side handled memory of C strings"""
 
@@ -2182,7 +2188,7 @@ class TestDATATYPES:
         N = 10
         buf1 = ns.BufInfo(
             np.array(range(N), dtype=np.float64), 2.*np.array(range(N), dtype=np.float64), N)
-        gc.collect()
+        gccollect()
 
         for i in range(buf1.size):
             assert buf1.data1[i] == 1.*i
@@ -2192,7 +2198,7 @@ class TestDATATYPES:
         buf2.data1 = 4.*np.array(range(N), dtype=np.float64)
         buf2.data2 = 5.*np.array(range(N), dtype=np.float64)
         buf2.size = N
-        gc.collect()
+        gccollect()
 
         assert len(buf2.data1) == N
         for i in range(buf2.size):

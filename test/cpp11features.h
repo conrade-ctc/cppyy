@@ -19,7 +19,7 @@ public:
     virtual ~TestSmartPtr() { --s_counter; }
 
 public:
-    virtual int get_value();
+    virtual int get_value() { return 17; }
 };
 
 std::shared_ptr<TestSmartPtr> create_shared_ptr_instance();
@@ -28,7 +28,7 @@ std::unique_ptr<TestSmartPtr> create_unique_ptr_instance();
 class DerivedTestSmartPtr : TestSmartPtr {
 public:
     DerivedTestSmartPtr(int i) : m_int(i) {}
-    virtual int get_value();
+    virtual int get_value() { return m_int + 76; }
 
 public:
     int m_int;

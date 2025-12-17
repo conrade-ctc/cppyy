@@ -1,7 +1,7 @@
 import py, os, sys
 import math, time
 from pytest import mark, raises
-from .support import setup_make, IS_LINUX_ARM
+from support import setup_make, IS_LINUX_ARM
 
 try:
     import numba

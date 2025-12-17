@@ -45,9 +45,11 @@ example01& example01::operator=(const example01& e) {
     }
     return *this;
 }
-example01::~example01() {
-    count--;
-}
+
+// FIXME: again, move impl into header
+//example01::~example01() {
+//    count--;
+//}
 
 // class-level methods
 int example01::staticAddOneToInt(int a) {

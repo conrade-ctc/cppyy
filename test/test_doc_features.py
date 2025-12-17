@@ -1,6 +1,6 @@
 import py, os, sys
 from pytest import raises, skip, mark
-from .support import setup_make, ispypy, IS_WINDOWS, IS_CLANG_REPL, IS_CLING, IS_CLANG_DEBUG, IS_MAC, IS_MAC_X86, IS_MAC_ARM, IS_LINUX_ARM, IS_VALGRIND
+from support import setup_make, ispypy, IS_WINDOWS, IS_CLANG_REPL, IS_CLING, IS_CLANG_DEBUG, IS_MAC, IS_MAC_X86, IS_MAC_ARM, IS_LINUX_ARM, IS_VALGRIND
 
 currpath = py.path.local(__file__).dirpath()
 test_dct = str(currpath.join("doc_helperDict"))
@@ -624,8 +624,12 @@ namespace Math {
     }
 }""")
 
-        from cppyy.gbl import Integer1
-        from cppyy.gbl.Math import Integer2
+        # FIXME: from import don't work...
+        #from cppyy.gbl import Integer1
+        #from cppyy.gbl.Math import Integer2
+
+        Integer1 = cppyy.gbl.Integer1
+        Integer2 = cppyy.gbl.Math.Integer2
 
         i = Integer1(42)
         i2 = Integer2(13)
@@ -865,7 +869,11 @@ class TestADVERTISED:
         } }""")
 
         cppyy.gbl.Advert04
-        from cppyy.gbl.Advert04 import SomeStruct, count_them
+
+        # FIXME: from imports not working
+        #from cppyy.gbl.Advert04 import SomeStruct, count_them
+        SomeStruct = cppyy.gbl.Advert04.SomeStruct
+        count_them = cppyy.gbl.Advert04.count_them
 
       # initialization on python side
         v = cppyy.gbl.std.vector['Advert04::SomeStruct*']()
@@ -898,7 +906,11 @@ class TestADVERTISED:
         } }""")
 
         cppyy.gbl.Advert05
-        from cppyy.gbl.Advert05 import SomeStruct, create_them
+
+        # FIXME: from imports not working
+        #from cppyy.gbl.Advert05 import SomeStruct, create_them
+        SomeStruct = cppyy.gbl.Advert05.SomeStruct
+        create_them = cppyy.gbl.Advert05.create_them
 
         ptr = cppyy.bind_object(cppyy.nullptr, SomeStruct)
         sz = ctypes.c_int(0)
@@ -926,7 +938,11 @@ class TestADVERTISED:
         } }""")
 
         cppyy.gbl.Advert06
-        from cppyy.gbl.Advert06 import createit, destroyit
+
+        # FIXME: from imports not working
+        #from cppyy.gbl.Advert06 import createit, destroyit
+        createit = cppyy.gbl.Advert06.createit
+        destroyit = cppyy.gbl.Advert06.destroyit
 
         ptr = ctypes.c_char_p()
         val = createit(ptr)
@@ -1093,7 +1109,10 @@ class TestTALKEXAMPLES:
         """Run-time template instantiation example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         v = cppyy.gbl.std.vector[CC.MyClass]()
 
@@ -1108,7 +1127,10 @@ class TestTALKEXAMPLES:
         """Cross-inheritance example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {
@@ -1128,7 +1150,10 @@ class TestTALKEXAMPLES:
         """Template instantiation with cross-inheritance example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         class PyMyClass(CC.MyClass):
             def __init__(self, data, extra):
@@ -1148,7 +1173,10 @@ class TestTALKEXAMPLES:
         """Template instantation switches based on value sizes"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {
@@ -1167,7 +1195,10 @@ class TestTALKEXAMPLES:
         """Function callback example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {
@@ -1194,7 +1225,10 @@ class TestTALKEXAMPLES:
         """Templated callback example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {
@@ -1225,7 +1259,10 @@ class TestTALKEXAMPLES:
         """Auto-cast and identiy preservation example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {
@@ -1250,7 +1287,10 @@ class TestTALKEXAMPLES:
             skip('throwing exceptions from the JIT terminates the process')
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {
@@ -1272,7 +1312,10 @@ class TestTALKEXAMPLES:
         """Unicode non-UTF-8 example"""
 
         import cppyy
-        import cppyy.gbl.talk_examples as CC
+
+        # FIXME: import as not working...
+        #import cppyy.gbl.talk_examples as CC
+        CC = cppyy.gbl.talk_examples
 
         cppyy.cppdef("""\
         namespace talk_examples {

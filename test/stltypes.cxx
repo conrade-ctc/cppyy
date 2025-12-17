@@ -94,6 +94,6 @@ const char* ErrorNamespace::MyError::what() const throw() { return fMsg.c_str();
 void ErrorNamespace::throw_error(int i) {
     if (i == 0) throw ::MyError("first error");
     else if (i == 1) throw ::YourError("second error");
-    else if (i == 2) throw MyError("third error");
-    throw YourError("fourth error");
+    else if (i == 2) throw ErrorNamespace::MyError("third error");
+    throw ErrorNamespace::YourError("fourth error");
 }

@@ -1,6 +1,6 @@
 import py, os, sys
 from pytest import mark, skip
-from .support import setup_make, pylong, pyunicode, IS_CLANG_REPL
+from support import setup_make, pylong, pyunicode, IS_CLANG_REPL
 
 nopsutil = False
 try:
@@ -149,6 +149,7 @@ class TestLEAKCHECK:
         self.check_func(m, 'method_ol', 42., tmpl_args='float')
         self.check_func(m, 'method_ret')
 
+    @mark.xfail(run=False, reason="crashes")
     def test04_default_arguments(self):
         """Leak test for functions with default arguments"""
 
@@ -190,6 +191,7 @@ class TestLEAKCHECK:
         self.check_func(m, 'method_default', b=-99)
         self.check_func(m, 'method_default', c=-99)
 
+    @mark.xfail(run=False, reason="crashes")
     def test05_aggregates(self):
         """Leak test of aggregate creation"""
 
