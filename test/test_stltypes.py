@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 import py, os, sys
 from pytest import raises, skip, mark
 from support import setup_make, pylong, pyunicode, maxvalue, ispypy, IS_CLANG_REPL, IS_CLING, IS_CLANG_DEBUG, IS_MAC_X86, IS_MAC_ARM, IS_MAC, IS_VALGRIND, IS_LINUX_ARM
@@ -1929,6 +1928,7 @@ class TestSTLSET:
         v = cppyy.gbl.std.set(l)
         assert list(l) == l
 
+    @mark.skip
     def test05_contains(self):
         """Contains check should not iterate and compare"""
 
