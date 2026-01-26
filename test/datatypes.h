@@ -89,6 +89,11 @@ typedef _C_double_complex ccomplex_t;   // id.
 
 class CppyyTestData {
 public:
+#if __cplusplus > 201402L
+    using my_byte = std::byte;
+#endif
+    using my_int8 = int8_t;
+    using my_uint8 = uint8_t;
     CppyyTestData();
     ~CppyyTestData();
 
@@ -183,10 +188,10 @@ public:
     const char16_t&           get_char16_cr();
     const char32_t&           get_char32_cr();
 #if __cplusplus > 201402L
-    /*const*/std::byte&          get_byte_cr();
+    const my_byte&            get_byte_cr();
 #endif
-    /*const*/int8_t&             get_int8_cr();
-    /*const*/uint8_t&            get_uint8_cr();
+    const my_int8&            get_int8_cr();
+    const my_uint8&           get_uint8_cr();
     const short&              get_short_cr();
     const unsigned short&     get_ushort_cr();
     const int&                get_int_cr();
@@ -471,10 +476,10 @@ public:
     char16_t             m_char16;
     char32_t             m_char32;
 #if __cplusplus > 201402L
-    std::byte            m_byte;
+    my_byte              m_byte;
 #endif
-    int8_t               m_int8;
-    uint8_t              m_uint8;
+    my_int8              m_int8;
+    my_uint8             m_uint8;
     short                m_short;
     unsigned short       m_ushort;
     int                  m_int;

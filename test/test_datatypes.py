@@ -49,10 +49,10 @@ class TestDATATYPES:
         assert c.m_char32 == u'\u00df'
 
         # reading integer types
-        assert c.m_int8    == - 9; assert c.get_int8_cr()    == - 9; assert c.get_int8_r()    == - 9
-        assert c.m_uint8   ==   9; assert c.get_uint8_cr()   ==   9; assert c.get_uint8_r()   ==   9
+        assert c.m_int8    == 'd'; assert c.get_int8_cr()    == 'd'; assert c.get_int8_r()    == ord('d')
+        assert c.m_uint8   == 'e'; assert c.get_uint8_cr()   == 'e'; assert c.get_uint8_r()   == ord('e')
         if self.has_byte:
-            assert c.m_byte == ord('d'); assert c.get_byte_cr() == ord('d'); assert c.get_byte_r() == ord('d')
+            assert c.m_byte == 'd';      assert c.get_byte_cr() == 'd';      assert c.get_byte_r() == ord('d')
         assert c.m_short   == -11; assert c.get_short_cr()   == -11; assert c.get_short_r()   == -11
         assert c.m_ushort  ==  11; assert c.get_ushort_cr()  ==  11; assert c.get_ushort_r()  ==  11
         assert c.m_int     == -22; assert c.get_int_cr()     == -22; assert c.get_int_r()     == -22
@@ -257,31 +257,39 @@ class TestDATATYPES:
 
         for i in range(len(names)):
             setattr(c, 'm_'+names[i], i)
-            assert eval('c.get_%s()' % names[i]) == i
+            assert eval('c.get_%s()' % names[i]) == i, names[i]
+
+        def acs(c, name, val):
+            en = eval('c.m_%s' % name)
+            t = type(en)
+            if t in [chr, str]:
+                assert en == chr(val), name
+            else:
+                assert en == val, name
 
         for i in range(len(names)):
             getattr(c, 'set_'+names[i])(2*i)
-            assert eval('c.m_%s' % names[i]) == 2*i
+            acs(c, names[i], 2*i)
 
         for i in range(len(names)):
             getattr(c, 'set_'+names[i]+'_cr')(3*i)
-            assert eval('c.m_%s' % names[i]) == 3*i
+            acs(c, names[i], 3*i)
 
         for i in range(len(names)):
             getattr(c, 'set_'+names[i]+'_rv')(4*i)
-            assert eval('c.m_%s' % names[i]) == 4*i
+            acs(c, names[i], 4*i)
 
         for i in range(len(names)):
             setattr(c, 'm_'+names[i], cppyy.default)
-            assert eval('c.get_%s()' % names[i]) == 0
+            assert eval('c.get_%s()' % names[i]) == 0, names[i]
 
         for i in range(len(names)):
             getattr(c, 'set_'+names[i])(cppyy.default)
-            assert eval('c.m_%s' % names[i]) == 0
+            acs(c, names[i], 0)
 
         for i in range(len(names)):
             getattr(c, 'set_'+names[i]+'_cr')(cppyy.default)
-            assert eval('c.m_%s' % names[i]) == 0
+            acs(c, names[i], 0)
 
         # float types through functions
         c.set_float(0.123);   assert round(c.get_float()   - 0.123, 5) == 0
