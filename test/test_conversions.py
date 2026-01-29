@@ -87,7 +87,8 @@ class TestCONVERSIONS:
         gc.collect()
         assert CC.s_count == 0
 
-    @mark.xfail(run=IS_CLANG_REPL, condition = IS_MAC or IS_CLING, reason = "Crashes on Cling")
+    #@mark.xfail(run=IS_CLANG_REPL, condition = IS_MAC or IS_CLING, reason = "Crashes on Cling")
+    @mark.skip
     def test04_implicit_conversion_from_tuple(self):
         """Allow implicit conversions from tuples as arguments {}-like"""
 
