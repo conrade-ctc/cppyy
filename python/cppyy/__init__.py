@@ -289,7 +289,8 @@ def add_library_path(path):
     """Add a path to the library search paths available to Cling."""
     if not os.path.isdir(path):
         raise OSError('No such directory: %s' % path)
-    gbl.gSystem.AddDynamicPath(path)
+    #gbl.gSystem.AddDynamicPath(path)
+    gbl.Cpp.AddSearchPath(path, True, False)
 
 # add access to Python C-API headers
 apipath = sysconfig.get_path('include', 'posix_prefix' if os.name == 'posix' else os.name)

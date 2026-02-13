@@ -2,4 +2,5 @@ if __name__ == "__main__":
     import sys
     import pytest
 
-    sys.exit(pytest.main())
+    #sys.exit(pytest.main(["--forked"]))
+    sys.exit(pytest.main(["--forked"]))
