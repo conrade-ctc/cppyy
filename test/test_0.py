@@ -223,3 +223,49 @@ class Test_0:
         del n
         self.assertEqual(sys.getrefcount(expr), refcnt)
         self.assertEqual(expr.use_count(), 1)
+
+    def testEnumTemplates(self):
+        with open("test_enum_templates.h", "w") as hdata:
+            print("""
+namespace EXNS {
+template <typename E>
+inline bool is_an_enum()
+{
+    return std::is_enum_v<E>;
+}
+
+template <typename E>
+inline std::string underlying_enum_type_name()
+{
+    using T = std::underlying_type_t<E>;
+    return std::string(std::is_signed_v<T> ? "" : "u") + "int" + std::to_string(8 * sizeof(T)) + "_t";
+}
+
+// get the standardized names of the underlying type of an enum
+template <typename E>
+requires std::is_enum_v<E>
+inline std::string underlying_type_name()
+{
+    using T = std::underlying_type_t<E>;
+    return std::string(std::is_signed_v<T> ? "" : "u") + "int" + std::to_string(8 * sizeof(T)) + "_t";
+}
+}
+        """, file = hdata)
+        cppyy.include("test_enum_templates.h")
+
+        cppyy.cppdef("""
+namespace NS0 {
+enum class EX : uint32_t
+{
+    A = 0b1,
+    B = 0b100,
+    C = 0b101
+};
+}
+        """)
+
+        EX = cppyy.gbl.NS0.EX
+        self.assertEqual(EX.A, 1)
+        self.assertTrue(cppyy.gbl.EXNS.is_an_enum[EX]())
+        self.assertEqual(cppyy.gbl.EXNS.underlying_enum_type_name[EX](), "uint32_t")
+        self.assertEqual(cppyy.gbl.EXNS.underlying_type_name[EX](), "uint32_t")
