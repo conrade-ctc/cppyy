@@ -1,5 +1,5 @@
 import py, os, sys
-from pytest import raises, skip, mark
+from pytest import raises, skip, xfail, mark
 from support import setup_make, pylong, pyunicode, IS_CLING, IS_MAC
 
 currpath = py.path.local(__file__).dirpath()
@@ -2355,3 +2355,22 @@ class TestDATATYPES:
         Ebool = cppyy.gbl.Ebool
         cls_Ebool0 = enum.Enum("Ebool0", [(n, v) for n, v in Ebool.__dict__.items() if isinstance(v, Ebool)])
         assert len(cls_Ebool0.__dict__["_member_names_"]) == 2
+
+    def test52_int8_goodness(self):
+        import cppyy
+        cppyy.cppdef("int8_t x52 = 123;")
+        assert cppyy.gbl.x52 == 123
+
+        cppyy.cppdef("enum class X52i1 : int8_t {M1=-1, M0=0, P1=1}; auto x52i1m1 = X52i1::M1;")
+        assert cppyy.gbl.x52i1m1 == cppyy.gbl.X52i1.M1
+        assert cppyy.gbl.x52i1m1 == -1
+
+    def test53_nanoseconds_goodness(self):
+        import cppyy
+        cppyy.cppdef("""
+        auto test53f0(int64_t x) { return std::chrono::nanoseconds{x}.count(); }
+        auto test53f1(std::chrono::nanoseconds x) { return x.count(); }
+        """)
+        from cppyy.gbl import std
+        assert cppyy.gbl.test53f0(1000) == 1000
+        assert cppyy.gbl.test53f1(std.chrono.nanoseconds(1000)) == 1000
