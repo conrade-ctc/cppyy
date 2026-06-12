@@ -273,7 +273,7 @@ class TestCROSSINHERITANCE:
             return "";
         } }""")
 
-        res = str(cppyy.gbl.CrossInheritance.call_base1(d))
+        res = cppyy.gbl.CrossInheritance.call_base1(d)
 
         assert 'ValueError' in res
         assert os.path.basename(__file__) in res

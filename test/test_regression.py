@@ -383,12 +383,12 @@ class TestREGRESSION:
         }""")
 
         nameit1 = cppyy.gbl.vec_vs_init.nameit1
-        assert 'vector' in str(nameit1(list(range(10))))
-        assert 'vector' in str(nameit1(cppyy.gbl.std.vector[int]()))
+        assert 'vector' in nameit1(list(range(10)))
+        assert 'vector' in nameit1(cppyy.gbl.std.vector[int]())
 
         nameit2 = cppyy.gbl.vec_vs_init.nameit2
-        assert 'vector' in str(nameit2(list(range(10))))
-        assert 'vector' in str(nameit2(cppyy.gbl.std.vector[int]()))
+        assert 'vector' in nameit2(list(range(10)))
+        assert 'vector' in nameit2(cppyy.gbl.std.vector[int]())
 
         sizeit = cppyy.gbl.vec_vs_init.sizeit
         assert sizeit(list(range(10))) == 10
