@@ -1977,7 +1977,6 @@ class TestSTLSET:
         v = cppyy.gbl.std.set(l)
         assert list(l) == l
 
-    @mark.xfail
     def test05_contains(self):
         """Contains check should not iterate and compare"""
 
