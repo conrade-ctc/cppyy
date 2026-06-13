@@ -1,0 +1,61 @@
+# Best-effort, NON-GATING Bazel build. The supported build is CMake/setup.py;
+# this job never blocks a PR. Every step swallows failure into a warning and the
+# job is continue-on-error. Tests need the full native toolchain and will often
+# fail in CI -- that is expected and fine here.
+name: bazel (best-effort)
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  bazel:
+    name: bazel (best-effort)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      # local_path_overrides are relative to the cppyy root (bazel, ../CppInterOp,
+      # ../cppyy-backend, ../CPyCppyy), so lay the siblings next to cppyy and run
+      # from within cppyy/.
+      - name: Checkout cppyy
+        uses: actions/checkout@v4
+        with:
+          path: cppyy
+
+      - name: Checkout CppInterOp
+        uses: actions/checkout@v4
+        with:
+          repository: compiler-research/CppInterOp
+          path: CppInterOp
+
+      - name: Checkout cppyy-backend
+        uses: actions/checkout@v4
+        with:
+          repository: compiler-research/cppyy-backend
+          path: cppyy-backend
+
+      - name: Checkout CPyCppyy
+        uses: actions/checkout@v4
+        with:
+          repository: compiler-research/CPyCppyy
+          path: CPyCppyy
+
+      - name: Fetch LLVM release
+        run: |
+          set -x
+          ver=21.1.0
+          url="https://github.com/llvm/llvm-project/releases/download/llvmorg-${ver}/clang+llvm-${ver}-x86_64-linux-gnu-ubuntu-22.04.tar.xz"
+          mkdir -p "$HOME/llvm" && cd "$HOME/llvm"
+          curl -fsSL "$url" -o llvm.tar.xz && tar xf llvm.tar.xz --strip-components=1
+          echo "LLVM_DIR=$HOME/llvm" >> "$GITHUB_ENV"
+        continue-on-error: true
+
+      - name: bazel build //...
+        working-directory: cppyy
+        run: bazelisk build //... || echo "::warning::bazel build //... failed (best-effort)"
+
+      - name: bazel test //:tests
+        working-directory: cppyy
+        run: bazelisk test //:tests || echo "::warning::bazel test //:tests failed (best-effort)"
