@@ -144,6 +144,7 @@ def _llvm_plugin():
 # BUILD.bazel). LLVM_SYSTEM_LIBS is re-exported for that default target.
 def llvm_linkopts():
     return _llvm_L_rpath() + _llvm_plugin() + [
+        "-Wl,--gc-sections",
         "-Wl,--start-group",
     ] + ["-l" + n for n in CLANG_LIB_NAMES] + \
         ["-l" + n for n in LLVM_LIB_NAMES] + [
