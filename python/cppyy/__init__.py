@@ -315,6 +315,12 @@ if not ispypy:
         apipath_extra = None
 
     if apipath_extra is None:
+      # bundled inside the package (wheel-layout and staged installs)
+        pkg_include = os.path.join(os.path.dirname(__file__), 'include')
+        if os.path.exists(os.path.join(pkg_include, 'CPyCppyy')):
+            apipath_extra = pkg_include
+
+    if apipath_extra is None:
         try:
             import pkg_resources as pr
 

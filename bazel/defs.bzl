@@ -26,6 +26,16 @@ def repo_loc(repo, is_self = False):
 def repo_rloc(repo, is_self = False):
     return "." if is_self else "../" + repo_name(repo)
 
+# ${ORIGIN} is expanded by cppyy-backend at startup to the directory of
+# libcppyy-backend.so itself (ELF-$ORIGIN semantics -- no build-system content
+# in the runtime code). Under Bazel that directory is always
+# <runfiles root>/<repo>/python/cppyy_backend/lib (fixed by the solib's
+# shared_lib_name), so four ups reach the runfiles root where sibling repos
+# live. Consumers join this with repo_name() to write cwd-independent
+# interpreter args:  ORIGIN_RUNFILES_ROOT + "/" + repo_name("@gcc") + "/..."
+# See ORIGIN.md for the full contract.
+ORIGIN_RUNFILES_ROOT = "${ORIGIN}/../../../.."
+
 # True when this module is built standalone (main repo, repository_name() == "@").
 def is_main_repo(current_repo):
     return current_repo.lstrip("@") == ""
@@ -105,6 +115,7 @@ def _llvm_plugin():
 # consumer can ship its own), not from here.
 def llvm_linkopts():
     return _llvm_L_rpath() + _llvm_plugin() + [
+               "-Wl,--gc-sections",
                "-Wl,--start-group",
            ] + ["-l" + n for n in CLANG_LIB_NAMES] + \
            ["-l" + n for n in LLVM_LIB_NAMES] + [
