@@ -1,5 +1,6 @@
 load("@cppyy_bazel//:defs.bzl", "jit_cxx_interp_args")
-load("@cppyy_bazel//:rules.bzl", "cppyy_py_test", "cppyy_test_dict_sos")
+load("@cppyy_bazel//:rules.bzl", "cppyy_py_test", "cppyy_selflocation_py_test", "cppyy_test_dict_sos")
+load("@cppyy_bazel//:staging.bzl", "stage_files")
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_python//python:packaging.bzl", "py_wheel")
 
@@ -70,6 +71,18 @@ filegroup(
 
 # Pure-Python cppyy package. Package list mirrors setup.py find_packages
 # (cppyy + cppyy.__pyinstaller); cppyy_compat is not part of the wheel.
+# Wheel-parity staging: expose the CPyCppyy C-API headers inside the cppyy
+# package (cppyy/include/CPyCppyy/...) so __init__.py's package-relative
+# fallback finds them without CPPYY_API_PATH -- needed when the consumer
+# builds its own libcppyy outside the @cpycppyy tree (then the existing
+# libcppyy-relative heuristics can't reach the headers).
+stage_files(
+    name = "staged_cpycppyy_headers",
+    srcs = ["@cpycppyy//:headers"],
+    out_dir = "python/cppyy/include/CPyCppyy",
+    path_anchor = "CPyCppyy",
+)
+
 py_library(
     name = "lib",
     srcs = glob([
@@ -80,6 +93,7 @@ py_library(
     # runtime; carry it (+ its headers) so any consumer of the python package
     # gets it in runfiles. The backend solib comes via @cppyy_backend//:pylib.
     data = [
+        ":staged_cpycppyy_headers",
         "@cpycppyy//:solib",
         "@cpycppyy//:headers",
     ],
@@ -140,6 +154,10 @@ cppyy_py_test(name = "test_stltypes", sokeys = ["stltypes"])
 cppyy_py_test(name = "test_streams", sokeys = ["std_streams"])
 cppyy_py_test(name = "test_templates", sokeys = ["templates"])
 
+# The self-location property gate: no path env vars, foreign cwd. See the
+# macro's docstring in cppyy_bazel/rules.bzl.
+cppyy_selflocation_py_test(name = "test_selflocation")
+
 # leakcheck and numba are flaky/heavy in upstream CI. The frozen cppyy_py_test
 # macro takes no tags param, so they are declared as normal targets but kept
 # OUT of the :tests suite below.
@@ -170,6 +188,7 @@ test_suite(
         ":test_pythonify",
         ":test_pythonization",
         ":test_regression",
+        ":test_selflocation",
         ":test_stltypes",
         ":test_streams",
         ":test_templates",

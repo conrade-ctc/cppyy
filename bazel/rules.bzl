@@ -9,8 +9,12 @@ Make-vars likewise resolve against the target's own deps. cppyy_bazel itself
 never resolves those names.
 """
 
-load("@llvm//:defs.bzl", "LLVM_CXX_STD", "LLVM_EXTRA_TEST_TAGS")
-load("//:defs.bzl", "BASE_COPTS", "CPPINTEROP_COPTS", "cppinterop_base_env", "is_main_repo", "repo_rloc")
+load("@llvm//:defs.bzl", "LLVM_CXX_STD", "LLVM_EXTRA_TEST_TAGS", "LLVM_INCLUDE_DIRS", "LLVM_VERSION")
+load("//:defs.bzl", "BASE_COPTS", "CPPINTEROP_COPTS", "ORIGIN_RUNFILES_ROOT", "cppinterop_base_env", "is_main_repo", "repo_name", "repo_rloc")
+
+# Explicit load instead of native.py_test: consumers may build with Starlark
+# rule autoloads disabled, where the native symbol no longer exists.
+load("@rules_python//python:defs.bzl", "py_test")
 
 # Extra tags a consumer asks for on the JIT test suites, via
 # llvm.config(extra_test_tags = [...]). Empty upstream. These tests JIT-compile
@@ -258,7 +262,7 @@ def cppyy_py_test(name, sokeys = [], extra_env = {}):
     # cppyy always consumes @cppinterop as an external dep (never its own main
     # repo), so cppinterop is never a self-reference here -- use the default.
     base_env = cppinterop_base_env()
-    native.py_test(
+    py_test(
         name = name,
         main = "test/test_main.py",
         tags = LLVM_EXTRA_TEST_TAGS,
@@ -292,10 +296,11 @@ def cppyy_py_test(name, sokeys = [], extra_env = {}):
             # staged into runfiles; empty by default (host).
             "@cppyy//:jit_cxx_data",
         ],
+        # No CPPINTEROP_LIB_PATH / CPPYY_BACKEND_LIBRARY here: the stack
+        # self-locates both (loader.py package-relative, clingwrapper
+        # beside-myself), so every test exercises that path.
         env = _jit_cxx_env(base_env | {
             "PYTHONUNBUFFERED": "1",
-            "CPPINTEROP_LIB_PATH": "$(location @cppinterop//:solib)",
-            "CPPYY_BACKEND_LIBRARY": "$(location @cppyy_backend//:solib)",
             "CPPYY_TEST_SKIP_MAKE": "True",
             # Test dicts and their headers land in test/ (relative to the
             # runfiles cwd); some tests load secondary dicts by bare name and
@@ -304,6 +309,64 @@ def cppyy_py_test(name, sokeys = [], extra_env = {}):
             "LD_LIBRARY_PATH": base_env["LD_LIBRARY_PATH"] + ":test",
             "CPLUS_INCLUDE_PATH": base_env["CPLUS_INCLUDE_PATH"] + ":test",
         } | extra_env),
+        # Resolves $(CPPINTEROP_JIT_CXX_ARGS) in the env (empty by default).
+        toolchains = ["@cppyy//:jit_cxx_interp_args"],
+    )
+
+# The clang builtin/LLVM include roots in ${ORIGIN} token form: cwd-independent,
+# resolved by cppyy-backend at startup. The regular test env instead uses
+# cwd-relative CPLUS_INCLUDE_PATH, which the self-location test cannot (it
+# chdir's away from the runfiles root by design).
+_LLVM_ORIGIN = ORIGIN_RUNFILES_ROOT + "/" + repo_name("@llvm")
+
+# -resource-dir is pinned (absolute after ${ORIGIN} expansion) so the property
+# holds regardless of what the host has installed: without it CppInterOp falls
+# back to probing the host clang, and a host clang of the same major version
+# gets ACCEPTED, mixing host glibc headers into the hermetic sysroot.
+_SELFLOC_INTERP_ARGS = " ".join(
+    ["-resource-dir=" + _LLVM_ORIGIN + "/lib/clang/" + LLVM_VERSION.split(".")[0]] +
+    ["-isystem" + _LLVM_ORIGIN + "/lib/clang/" + LLVM_VERSION.split(".")[0] + "/include"] +
+    ["-isystem" + _LLVM_ORIGIN + "/" + d for d in LLVM_INCLUDE_DIRS],
+)
+
+def cppyy_selflocation_py_test(name):
+    """The self-location property test: no lib/include path env vars, no
+    CPLUS_INCLUDE_PATH, no LD_LIBRARY_PATH, cwd changed away from the runfiles
+    root before import. Everything must resolve from the libraries' own
+    locations plus the ${ORIGIN} token args."""
+    py_test(
+        name = name,
+        main = "test/test_main.py",
+        tags = LLVM_EXTRA_TEST_TAGS,
+        srcs = [
+            "test/" + name + ".py",
+            "test/support.py",
+            "test/test_main.py",
+            "test/assert_interactive.py",
+            "test/doc_args_funcs.py",
+            "test/templ_args_funcs.py",
+        ],
+        args = ["$(rootpath test/" + name + ".py)"],
+        imports = ["test"],
+        deps = [
+            "@cppyy//:lib",
+            "@cppyy//:pytest",
+            "@cppyy_bazel//:sitecustomize",
+        ],
+        data = [
+            "@cpycppyy//:solib",
+            "@llvm//:all_files",
+            # Consumer-supplied JIT C++ toolchain (libstdc++ headers / clang)
+            # staged into runfiles; empty by default (host).
+            "@cppyy//:jit_cxx_data",
+        ],
+        env = _jit_cxx_env({
+            "PYTHONUNBUFFERED": "1",
+            "CLING_STANDARD_PCH": "none",
+            # $$ keeps the ${ORIGIN} token literal through the env attr's
+            # Make-variable expansion (cppyy-backend expands it, not Bazel).
+            "CPPINTEROP_EXTRA_INTERPRETER_ARGS": _SELFLOC_INTERP_ARGS.replace("$", "$$"),
+        }),
         # Resolves $(CPPINTEROP_JIT_CXX_ARGS) in the env (empty by default).
         toolchains = ["@cppyy//:jit_cxx_interp_args"],
     )

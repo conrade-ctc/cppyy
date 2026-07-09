@@ -41,6 +41,16 @@ def repo_rloc(repo, is_self = False):
     # Main repo's files are at the runfiles root, which is the test's cwd (".").
     return "." if is_self else "../" + repo_name(repo)
 
+# ${ORIGIN} is expanded by cppyy-backend at startup to the directory of
+# libcppyy-backend.so itself (ELF-$ORIGIN semantics -- no build-system content
+# in the runtime code). Under Bazel that directory is always
+# <runfiles root>/<repo>/python/cppyy_backend/lib (fixed by the solib's
+# shared_lib_name), so four ups reach the runfiles root where sibling repos
+# live. Consumers join this with repo_name() to write cwd-independent
+# interpreter args:  ORIGIN_RUNFILES_ROOT + "/" + repo_name("@gcc") + "/..."
+# See ORIGIN.md for the full contract.
+ORIGIN_RUNFILES_ROOT = "${ORIGIN}/../../../.."
+
 # True when building this module standalone (it is the main repo, repository_name()
 # == "@"); used by a module's own BUILD/macros to mark a self-reference for
 # repo_loc/repo_rloc. False when the module is an external dependency.
