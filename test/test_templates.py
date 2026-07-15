@@ -1334,6 +1334,23 @@ class TestTEMPLATES:
         assert a.m([1, 2, 3])
         assert not a.m(42)
 
+    def test40_instantiation_failure_error_message(self):
+        """Rejected instantiation names the template, not garbage"""
+
+        import cppyy
+
+        cppyy.cppdef("namespace errpath { template <unsigned N> struct Buf { int tag; }; }")
+
+        # A type argument for a non-type parameter resolves but the
+        # instantiation is rejected: the error path must name the template
+        # (it used to reinterpret the PyObject* scope handle as a decl,
+        # yielding '<unnamed>' or a segfault).
+        with raises(TypeError) as exc:
+            cppyy.gbl.errpath.Buf["int"]
+        msg = str(exc.value)
+        assert "errpath::Buf" in msg
+        assert "<unnamed>" not in msg
+
 
 @mark.skipif((IS_MAC and IS_CLING), reason="setup class fails with OS X cling")
 class TestTEMPLATED_TYPEDEFS:
