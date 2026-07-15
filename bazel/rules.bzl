@@ -15,6 +15,7 @@ load("//:defs.bzl", "BASE_COPTS", "CPPINTEROP_COPTS", "ORIGIN_RUNFILES_ROOT", "c
 # Explicit load instead of native.py_test: consumers may build with Starlark
 # rule autoloads disabled, where the native symbol no longer exists.
 load("@rules_python//python:defs.bzl", "py_test")
+load("@@rules_cc+//cc:defs.bzl", "cc_library", "cc_shared_library", "cc_test")
 
 # The JIT tests need a C++ toolchain at RUN time (clang-repl compiles in-process).
 # Standalone uses the host's; a consumer without one (e.g. nebula CI) supplies it
@@ -165,7 +166,7 @@ def cppinterop_cc_test(name, srcs, extra_copts = [], extra_deps = [], extra_dyna
     # copy of LLVM's globals and the in-process clang AST asserts. -rdynamic exports
     # the test's own symbols so the JIT can resolve template bodies instantiated in
     # the test TU (e.g. instantiation_in_host<int>).
-    native.cc_test(
+    cc_test(
         dynamic_deps = ["@cppinterop//:solib"] + extra_dynamic_deps,
         linkopts = ["-ldl", "-lpthread", "-rdynamic"],
         tags = LLVM_EXTRA_TEST_TAGS,
@@ -199,7 +200,7 @@ def cppinterop_dispatch_cc_test(name, srcs):
         }),
         includes = ["include", "unittests/CppInterOp"],
     )
-    native.cc_test(
+    cc_test(
         tags = LLVM_EXTRA_TEST_TAGS,
         # Resolves $(CPPINTEROP_JIT_CXX_ARGS) in the env (empty by default).
         toolchains = ["@cppinterop//:jit_cxx_interp_args"],
@@ -213,7 +214,7 @@ def cppyy_test_dict_sos(sokeys):
     test sources.
     """
     for key in sokeys:
-        native.cc_library(
+        cc_library(
             name = key + ".a",
             srcs = ["test/" + key + ".cxx"],
             hdrs = native.glob(["test/*.h"]),
@@ -228,7 +229,7 @@ def cppyy_test_dict_sos(sokeys):
             ],
             deps = ["@rules_python//python/cc:current_py_cc_headers"],
         )
-        native.cc_shared_library(
+        cc_shared_library(
             name = key + "Dict.so",
             deps = [key + ".a"],
             shared_lib_name = "test/" + key + "Dict.so",

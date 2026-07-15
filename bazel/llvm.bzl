@@ -14,6 +14,7 @@ the right -isystem set for either tree shape.
 
 _BUILD_HEADER = """\
 load(":cc_toolchain.bzl", "cppjit_cc_toolchain")
+load("@@rules_cc+//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -50,6 +51,7 @@ _CC_TOOLCHAIN_BZL = '''\
 """Centralized clang C++ toolchain for the cppjit stack (generated)."""
 
 load("@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@@rules_cc+//cc:defs.bzl", "cc_toolchain")
 
 _BUILTIN_INCLUDES = {builtin_includes}
 _ABI_FLAGS = {abi_flags}
@@ -89,7 +91,7 @@ def cppjit_cc_toolchain(name):
         supports_start_end_lib = {supports_start_end_lib},
     )
 
-    native.cc_toolchain(
+    cc_toolchain(
         name = name + "_cc",
         toolchain_config = ":" + name + "_config",
         all_files = ":all_files",
