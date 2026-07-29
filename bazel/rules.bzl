@@ -248,6 +248,10 @@ def cppyy_py_test(name, sokeys = [], extra_env = {}):
     # cppyy always consumes @cppinterop as an external dep (never its own main
     # repo), so cppinterop is never a self-reference here -- use the default.
     base_env = cppinterop_base_env()
+
+    # test/ resolves under the cppyy repo, which is the runfiles cwd standalone
+    # but external/<cppyy>+ when a consumer runs the suite.
+    test_dir = repo_rloc("@cppyy", is_main_repo(native.repository_name())) + "/test"
     py_test(
         name = name,
         main = "test/test_main.py",
@@ -288,12 +292,11 @@ def cppyy_py_test(name, sokeys = [], extra_env = {}):
         env = _jit_cxx_env(base_env | {
             "PYTHONUNBUFFERED": "1",
             "CPPYY_TEST_SKIP_MAKE": "True",
-            # Test dicts and their headers land in test/ (relative to the
-            # runfiles cwd); some tests load secondary dicts by bare name and
-            # the loader force-includes the matching header, so put test/ on
-            # both the library and the interpreter include paths.
-            "LD_LIBRARY_PATH": base_env["LD_LIBRARY_PATH"] + ":test",
-            "CPLUS_INCLUDE_PATH": base_env["CPLUS_INCLUDE_PATH"] + ":test",
+            # Some tests load secondary dicts by bare name and the loader
+            # force-includes the matching header, so put test/ on both the
+            # library and the interpreter include paths.
+            "LD_LIBRARY_PATH": base_env["LD_LIBRARY_PATH"] + ":" + test_dir,
+            "CPLUS_INCLUDE_PATH": base_env["CPLUS_INCLUDE_PATH"] + ":" + test_dir,
         } | extra_env),
         # Resolves $(CPPINTEROP_JIT_CXX_ARGS) in the env (empty by default).
         toolchains = ["@cppyy//:jit_cxx_interp_args"],
